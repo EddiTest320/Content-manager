@@ -1,0 +1,55 @@
+class OpenFile:
+    def __init__(self, path, mode, encoding=None, errors=None, buffering=-1):
+
+        self.path = path
+        self.mode = mode
+        self.encoding = encoding
+        self.errors = errors
+        self.buffering = buffering
+        self.file = None
+
+    def __enter__(self):
+        self.file = open(
+            self.path,
+            self.mode,
+            encoding=self.encoding,
+            errors=self.errors,
+            buffering=self.buffering
+        )
+        return self.file
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if self.file and not self.file.closed:
+                self.file.close()
+        except Exception as e:
+            print(f"Ошибка при закрытии файла {self.path}: {e}")
+
+        return False
+
+print("Пример 1: Чтение файла")
+try:
+    with OpenFile('test.txt', 'r', encoding='utf-8') as f:
+        content = f.read()
+        print(f"Содержимое файла: {content[:50]}...")
+except FileNotFoundError:
+    print("Файл не найден")
+
+print("\n" + "=" * 40)
+
+print("Пример 2: Запись в файл")
+with OpenFile('output.txt', 'w', encoding='utf-8') as f:
+    f.write("Тестовая запись\n")
+    f.write("Вторая строка\n")
+    print("Данные записаны в файл")
+
+print("\n" + "=" * 40)
+
+print("Пример 3: С исключением внутри блока")
+try:
+    with OpenFile('test.txt', 'r', encoding='utf-8') as f:
+        print("Читаем файл...")
+        raise ValueError("Исключение внутри блока with")
+except ValueError as e:
+    print(f"Исключение перехвачено: {e}")
+    print("Файл был автоматически закрыт, несмотря на исключение!")
